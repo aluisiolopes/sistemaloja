@@ -1,0 +1,18 @@
+# Arquivos de ambiente
+.env
+.env.*
+!/.env.example
+
+# Cache e dependências Python
+__pycache__/
+*.pyc
+.pytest_cache/
+htmlcov/
+
+# Dependências Node.js
+node_modules/
+dist/
+.pnp.*
+
+# Arquivos de teste e build
+test.db

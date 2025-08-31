@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  backend-produtos:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db-produtos
+      - redis-produtos
+    networks:
+      - gestao-lojas-network
+
+  frontend-produtos:
+    build:
+      context: ./frontend/produto-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./frontend/produto-frontend:/app
+    env_file:
+      - ./frontend/produto-frontend/.env
+    depends_on:
+      - backend-produtos
+    networks:
+      - gestao-lojas-network
+
+  db-produtos:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: gestao_lojas_produtos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - db_produtos_data:/var/lib/postgresql/data
+      - ./database/init_produtos.sql:/docker-entrypoint-initdb.d/init_produtos.sql
+    networks:
+      - gestao-lojas-network
+
+  redis-produtos:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    networks:
+      - gestao-lojas-network
+
+networks:
+  gestao-lojas-network:
+    driver: bridge
+
+volumes:
+  db_produtos_data:
+
+
