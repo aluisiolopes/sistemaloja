@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_clientes
+    environment:
+      POSTGRES_DB: gestao_lojas
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_clientes
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_clientes
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/gestao_lojas
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend/cliente-frontend
+      dockerfile: Dockerfile
+    container_name: frontend_clientes
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/cliente-frontend:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
+
